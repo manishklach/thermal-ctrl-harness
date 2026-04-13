@@ -11,6 +11,7 @@ python -m thermal_ctrl validate-env
 ```
 
 This confirms the simulation path, artifacts, and environment checks are working.
+Open `artifacts/<timestamp>-compare/comparison.md` first, then review the `baseline/` and `controlled/` summaries.
 
 ## Step 2: Validate telemetry availability
 - check that `nvidia-smi` exists
@@ -23,6 +24,7 @@ If you plan to use HTTP adapters, confirm:
 - the payload shape is correct
 - the action is idempotent
 - the service behavior under repeated calls is safe
+- a 404 from `validate-env` means the service responded but the adapter path is still unconfirmed
 
 Do not assume any upstream admin API from this repo alone.
 

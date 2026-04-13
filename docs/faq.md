@@ -17,3 +17,6 @@ Trust the repo for reproducibility and systems reasoning, not for unvalidated ha
 
 ## How would I adapt this to a real cluster?
 Start by validating telemetry and backend semantics with `python -m thermal_ctrl validate-env`, then replace mock adapters one boundary at a time and follow `docs/validation_playbook.md`.
+
+## What does a 404 in `validate-env` mean?
+It means an HTTP service answered, but the control endpoint path used by this prototype was not confirmed there. That is a compatibility signal, not a successful validation.

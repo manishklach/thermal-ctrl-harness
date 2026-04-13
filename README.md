@@ -23,14 +23,21 @@ This repository is an honest systems prototype: it models thermal pressure, queu
 ## Trust Boundaries
 - **Simulated**: temperature dynamics, queue growth, thermal-latency coupling, KV spill relief, recovery hysteresis, oscillation behavior.
 - **Assumed**: HTTP admin adapters that resemble batch-control or KV-migration surfaces; these are experimental and may not match your serving stack.
-- **Measured in the local demo**: deterministic simulation output, local CLI checks, artifact generation, and Prometheus/Grafana wiring.
+- **Measured locally**: deterministic CLI output, generated artifact files, and environment-check results on the machine where you run the commands.
 - **Still to confirm on real accelerators**: whether `nvidia-smi --query-gpu=memory.temp` is available and stable on your hardware, whether thermal risk correlates with p99 in your workload, and how safe automated control is for your inference stack.
 
 ## Quick Start
-Run a local, deterministic comparison with one command:
+From the repo root, install the small Python dependency set:
+
+```bash
+python -m pip install -r requirements.txt
+```
+
+Then run the canonical local review path:
 
 ```bash
 python -m thermal_ctrl compare --baseline configs/baseline.yaml --controlled configs/simulated.yaml --seed 7
+python -m thermal_ctrl validate-env
 ```
 
 That command generates a comparison bundle in `artifacts/<timestamp>-compare/` with:
@@ -40,6 +47,14 @@ That command generates a comparison bundle in `artifacts/<timestamp>-compare/` w
 - summary markdown
 - SVG plots
 - baseline vs controlled comparison report
+
+Inspect these files first:
+
+```bash
+artifacts/<timestamp>-compare/comparison.md
+artifacts/<timestamp>-compare/baseline/summary.md
+artifacts/<timestamp>-compare/controlled/summary.md
+```
 
 ## Simulation Mode
 Simulation is a first-class surface in this repo, not a hidden fallback.
@@ -65,6 +80,8 @@ python -m thermal_ctrl compare --baseline configs/baseline.yaml --controlled con
 python -m thermal_ctrl dry-run --config configs/config.yaml --seed 7
 python -m thermal_ctrl validate-env
 ```
+
+`simulate` writes a single scenario bundle. `compare` writes a bundle with `baseline/` and `controlled/` subdirectories plus a top-level `comparison.md`.
 
 ## Adapter Surface
 This repo is intentionally not hard-coded to any single inference server.
@@ -127,10 +144,17 @@ python -m thermal_ctrl validate-env
 It reports:
 - whether `nvidia-smi` is present
 - whether `memory.temp` appears to be queryable
-- whether the configured admin endpoint is reachable
+- whether the configured admin URL responds, and whether the control endpoint is still unconfirmed
 - what this repo considers supported versus still experimental
 
 It does **not** claim your environment is hardware-validated.
+
+## Known Limitations
+- No target-HW validation is included in this repo today.
+- The local simulation is a simplified control-study model, not a hardware thermal simulator.
+- HTTP backends are adapter stubs for experimentation and may require custom integration work in real inference stacks.
+- Telemetry availability varies by GPU, driver, and platform; `memory.temp` should be validated in your environment.
+- The control policy is intentionally simple and conservative; it is not tuned for all deployments.
 
 ## File Map
 ```text
@@ -148,6 +172,7 @@ docs/
   architecture.md
   simulation_model.md
   failure_modes.md
+  policy.md
   validation_playbook.md
   faq.md
 ```

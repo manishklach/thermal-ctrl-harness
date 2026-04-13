@@ -70,10 +70,19 @@ def _available_nvidia_query_fields() -> dict:
 def _check_admin_endpoint(admin_url: str) -> dict:
     try:
         response = requests.get(f"{admin_url}/batch", timeout=1)
+        if response.status_code == 200:
+            status = "responding"
+            note = "The endpoint responded successfully. Treat it as unvalidated until you confirm payload semantics in your own serving stack."
+        elif response.status_code == 404:
+            status = "http_reachable_endpoint_unconfirmed"
+            note = "A service is reachable, but `/batch` was not confirmed at this path. This repo does not assume upstream admin endpoints exist."
+        else:
+            status = "http_reachable_unvalidated"
+            note = "A service responded, but the control endpoint contract is still unvalidated for this repo."
         return {
-            "status": "reachable",
+            "status": status,
             "http_status": response.status_code,
-            "note": "This repo treats admin endpoints as experimental adapter targets unless you validate them in your environment.",
+            "note": note,
         }
     except Exception as exc:
         return {"status": "unreachable", "message": str(exc)}

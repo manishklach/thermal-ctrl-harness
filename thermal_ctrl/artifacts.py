@@ -73,6 +73,7 @@ def write_bundle(
 
     (artifact_path / "timeseries.svg").write_text(build_chart_svg(samples), encoding="utf-8")
     (artifact_path / "summary.md").write_text(build_summary_markdown(summary, comparison), encoding="utf-8")
+    (artifact_path / "README.md").write_text(build_bundle_readme(summary, comparison), encoding="utf-8")
     return artifact_path
 
 
@@ -146,6 +147,33 @@ def build_summary_markdown(summary: dict, comparison: Optional[dict]) -> str:
                 f"- Delta throughput: `{comparison['delta_throughput_toks_per_s']} toks/s`",
             ]
         )
+    return "\n".join(lines) + "\n"
+
+
+def build_bundle_readme(summary: dict, comparison: Optional[dict]) -> str:
+    lines = [
+        f"# Artifact Bundle: {summary['scenario_name']}",
+        "",
+        "Contents:",
+        "- `config.json` - resolved config for this run",
+        "- `events.json` - control events with reason codes",
+        "- `summary.json` - machine-readable summary",
+        "- `summary.md` - reviewer-oriented summary",
+        "- `timeseries.csv` - time series data",
+        "- `timeseries.svg` - quick-look chart",
+    ]
+    if comparison is not None:
+        lines.append("- `comparison.json` - machine-readable comparison summary")
+    lines.extend(
+        [
+            "",
+            "Key summary:",
+            f"- Peak temp: `{summary['peak_temp_c']} C`",
+            f"- Time above threshold: `{summary['time_above_threshold_s']} s`",
+            f"- Simulated p99: `{summary['latency_ms_p99']} ms`",
+            f"- Throughput: `{summary['throughput_toks_per_s']} toks/s`",
+        ]
+    )
     return "\n".join(lines) + "\n"
 
 

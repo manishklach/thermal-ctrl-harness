@@ -30,6 +30,7 @@ class EventRecorder:
 
 
 def build_runtime(config: dict):
+    """Construct sensor, workload model, backends, and sinks from validated config."""
     sensor_cfg = config["sensor"]
     policy_cfg = config["policy"]
     backend_cfg = config["backends"]
@@ -68,6 +69,7 @@ def build_runtime(config: dict):
 
 
 def run_simulation(config: dict, write_artifacts_flag: bool = True) -> RunResult:
+    """Run one deterministic simulation or dry-run scenario."""
     sensor, workload_signal, batch_backend, kv_backend, metrics_sinks = build_runtime(config)
     policy = PolicyEngine(config["policy"])
     recorder = EventRecorder()
@@ -185,6 +187,7 @@ def run_simulation(config: dict, write_artifacts_flag: bool = True) -> RunResult
 
 
 def compare_runs(baseline_config_path: str, controlled_config_path: str, seed: Optional[int] = None) -> dict:
+    """Run baseline and controlled scenarios and write a comparison bundle."""
     baseline_cfg = load_config(baseline_config_path)
     controlled_cfg = load_config(controlled_config_path)
     if seed is not None:
@@ -206,9 +209,14 @@ def compare_runs(baseline_config_path: str, controlled_config_path: str, seed: O
     )
     (artifact_path / "comparison.md").write_text(
         "# Baseline vs controlled\n\n"
+        f"- Bundle root: `{artifact_path}`\n"
+        f"- Baseline bundle: `baseline/`\n"
+        f"- Controlled bundle: `controlled/`\n"
+        "- Inspect `baseline/summary.md`, `controlled/summary.md`, and `controlled/comparison.json` first.\n\n"
         f"- Baseline p99: `{baseline.summary['latency_ms_p99']} ms`\n"
         f"- Controlled p99: `{controlled.summary['latency_ms_p99']} ms`\n"
         f"- Delta p99: `{comparison['delta_latency_ms_p99']} ms`\n"
+        f"- Delta time above threshold: `{comparison['delta_time_above_threshold_s']} s`\n"
         f"- Delta throughput: `{comparison['delta_throughput_toks_per_s']} toks/s`\n",
         encoding="utf-8",
     )

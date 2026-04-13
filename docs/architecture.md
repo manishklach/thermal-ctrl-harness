@@ -37,3 +37,5 @@ The original prototype was tightly coupled to assumed admin endpoints. In v0.2.0
 
 ## Production intent
 The architecture is meant to be production-possible, not production-proven. The simulated path should be enough to review policy quality. Real deployment should only happen after environment validation plus workload-specific testing.
+
+In particular, the checked-in HTTP adapters are experimental integration points, not validated claims about any upstream serving API.

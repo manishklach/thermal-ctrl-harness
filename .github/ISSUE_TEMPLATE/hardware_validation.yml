@@ -1,0 +1,46 @@
+name: Hardware Validation Report
+description: Tested this on a real H100/H200/MI300X - thank you!
+labels: [validation]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        This is the most valuable contribution. Please share what you found.
+  - type: input
+    id: gpu
+    attributes:
+      label: GPU Model + SKU
+    validations:
+      required: true
+  - type: input
+    id: workload
+    attributes:
+      label: Workload
+      placeholder: Llama-3.1-70B, 128K context, batch=32
+    validations:
+      required: true
+  - type: dropdown
+    id: memory-temp
+    attributes:
+      label: Does `nvidia-smi --query-gpu=memory.temp` work?
+      options:
+        - Yes, reports values
+        - No, field missing
+        - Other
+    validations:
+      required: true
+  - type: dropdown
+    id: admin-api
+    attributes:
+      label: Does vLLM `/v1/admin/batch` exist with `--enable-admin-api`?
+      options:
+        - Yes, works
+        - No, 404
+        - Didn't test
+  - type: textarea
+    id: results
+    attributes:
+      label: Results
+      description: Did cutting batch drop temp? Did p99 improve? Paste nvidia-smi dmon or Grafana screenshots.
+    validations:
+      required: true

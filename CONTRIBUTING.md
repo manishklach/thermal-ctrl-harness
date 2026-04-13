@@ -1,33 +1,48 @@
-# Contributing
+# Contributing to thermal-ctrl-harness
 
-Thanks for taking a look at `thermal-ctrl-harness`.
+Thanks for checking this out. This is an RFC/prototype to validate if HBM thermal throttling kills vLLM p99.
 
-## Before you open a PR
-- Open an issue first for larger changes so the scope stays tight
-- Keep changes focused on thermal control, observability, or deployment ergonomics
-- Prefer small patches over broad refactors
+## How to help
 
-## Local checks
-Run the same checks CI runs before you push:
+**1. Test on real hardware**
+If you have H100/H200/MI300X access, please run through `VALIDATION.md` and open an issue with results. This is the highest-leverage contribution.
 
+**2. Code**
+PRs welcome for:
+- NVML bindings to replace `nvidia-smi` shell-out
+- AMD `rocm-smi` support
+- vLLM scheduler plugin vs admin API
+- Better cold-KV heuristics
+
+**3. Docs**
+Found a typo or unclear setup step? PR it.
+
+## Dev setup
 ```bash
-python -m pytest -q
-python -m ruff check src tests
-docker build -t thermal-ctrl-harness:test .
+git clone https://github.com/manishklach/thermal-ctrl-harness
+cd thermal-ctrl-harness
+python -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt -r requirements-dev.txt
+pytest
 ```
 
-## Demo changes
-- If you touch demo behavior, keep the simulated path honest and documented
-- Do not remove the README note that `SIMULATE_THERMAL=1` is a demo mode
+No GPU? Use `SIMULATE_THERMAL=1` to run the demo.
 
-## Pull requests
-- Describe the operational impact
-- Call out config or API changes
-- Include screenshots or GIFs for Grafana/dashboard updates when relevant
+## Code style
+- Python 3.9+
+- `black`, `isort`, and `flake8`
+- Type hints required for new code
+- Tests for new logic in `tests/`
 
-## Issue reports
-Useful details:
-- GPU model and driver version
-- Whether temps came from `nvidia-smi` or simulation mode
-- vLLM/TensorRT-LLM version
-- Relevant controller logs or Prometheus samples
+## PR process
+1. Open an issue first for non-trivial changes
+2. Keep PRs focused: 1 feature/fix per PR
+3. CI must pass
+4. Update README if behavior changes
+
+## Code of Conduct
+Be respectful. Assume good intent. We're all debugging GPUs together.
+
+## License
+By contributing, you agree your code is MIT licensed.

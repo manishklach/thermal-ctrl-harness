@@ -105,4 +105,4 @@ That screenshot is worth 1000 stars. We'll add you to `THANKS.md` and cite you i
 
 **No GPU?** You can still help: review the code, suggest better cold-KV heuristics, or find docs on HBM throttle behavior.
 
-**Questions**: Open an issue or ping me on Twitter @manishklach.
+**Questions**: Open an issue or ping me on X @OrbitHigher.

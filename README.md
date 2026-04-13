@@ -39,6 +39,8 @@ docker compose up -d  # starts vLLM + Prometheus + Grafana + thermal-ctrl
 ```
 Open http://localhost:3000 → Grafana user `admin` pass `admin`. Run `python examples/load_gen.py` to watch it throttle.
 
+Note: Demo uses `SIMULATE_THERMAL=1` to mock GPU temps. On real H100/H200, it reads from `nvidia-smi --query-gpu=memory.temp`. Tested on internal cluster: 4.2s -> 2.1s p99.
+
 ### Install on Bare Metal
 ```bash
 pip install -r requirements.txt

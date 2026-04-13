@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
-import subprocess, time, requests, yaml, logging, signal, sys
+import os, subprocess, time, requests, yaml, logging, signal, sys
 from prometheus_client import start_http_server, Gauge
 from pathlib import Path
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(message)s')
+
+SIMULATE = os.getenv("SIMULATE_THERMAL") == "1" or "--simulate" in sys.argv
 
 CONFIG_PATH = Path("/etc/thermal-ctrl/config.yaml")
 DEFAULT_CONFIG = {
@@ -31,6 +33,16 @@ class ThermalController:
         sys.exit(0)
 
     def get_hbm_temps(self):
+        if SIMULATE:
+            # Simulate 72C -> 84C -> 86C -> 82C over a short loop for demos.
+            t = int(time.time()) % 20
+            if t < 5:
+                return [(0, 72)]
+            if t < 10:
+                return [(0, 84)]
+            if t < 12:
+                return [(0, 86)]
+            return [(0, 82)]
         try:
             out = subprocess.check_output(
                 ["nvidia-smi", "--query-gpu=index,memory.temp", "--format=csv,noheader,nounits"],

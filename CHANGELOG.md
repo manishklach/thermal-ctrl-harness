@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.2.1
+- hardened README and docs for reviewer accuracy and command correctness
+- clarified that a `404` from `validate-env` means the service responded but the prototype control endpoint is still unconfirmed
+- added a sharper canonical local review path with explicit install, run, and artifact inspection steps
+- added `Known Limitations` to the README
+- added small artifact-bundle README files to improve inspection and reviewability
+
 ## v0.2.0
 - reframed the repo as a thermal-control simulation and validation harness
 - added a first-class CLI for simulate, compare, dry-run, and validate-env

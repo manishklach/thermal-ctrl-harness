@@ -1,7 +1,7 @@
 # FAQ
 
 ## Do I need an H100/H200 to use this repo?
-No. The primary workflow in v0.2.0 is the simulation and validation harness, which runs locally without target hardware.
+No. The primary workflow in v0.2.1 is the simulation and validation harness, which runs locally without target hardware.
 
 ## Is this hardware-validated?
 No. The repo explicitly separates implemented behavior, simulated behavior, and hardware validation that still needs to happen.

@@ -1,4 +1,4 @@
-version: "0.2.0"
+version: "0.2.1"
 mode: simulation
 scenario_name: local-dry-run
 seed: 7

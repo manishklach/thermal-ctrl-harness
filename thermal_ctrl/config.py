@@ -8,7 +8,7 @@ import yaml
 
 
 DEFAULT_CONFIG: Dict[str, Any] = {
-    "version": "0.2.0",
+    "version": "0.2.1",
     "mode": "simulation",
     "scenario_name": "controlled",
     "seed": 7,

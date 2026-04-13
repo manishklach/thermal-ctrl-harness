@@ -1,6 +1,6 @@
 # Architecture
 
-The v0.2.0 architecture is built around explicit interfaces so the repo is useful before hardware validation and adaptable afterward.
+The v0.2.1 architecture is built around explicit interfaces so the repo is useful before hardware validation and adaptable afterward.
 
 ## Components
 - **TemperatureSensor**
@@ -19,7 +19,7 @@ The v0.2.0 architecture is built around explicit interfaces so the repo is usefu
   Emits config, events, summaries, CSV, and SVG charts for every run.
 
 ## Why adapters matter
-The original prototype was tightly coupled to assumed admin endpoints. In v0.2.0 the adapter boundary makes the trust model explicit:
+The original prototype was tightly coupled to assumed admin endpoints. In v0.2.1 the adapter boundary makes the trust model explicit:
 - you can exercise the control loop entirely with mocks
 - you can swap in `nvidia-smi` without changing policy logic
 - you can experiment with HTTP control surfaces without claiming they are validated upstream APIs

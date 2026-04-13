@@ -187,7 +187,7 @@ docs/
 - [CHANGELOG.md](CHANGELOG.md)
 
 ## Release Notes
-v0.2.0 reframes the project as a reproducible simulation and validation harness, adds the adapter architecture, improves the policy engine, and makes artifact generation a first-class workflow.
+v0.2.1 tightens the public story, clarifies endpoint-validation semantics, and makes the default reviewer workflow easier to follow without changing the repo's scope.
 
 ## License
 MIT

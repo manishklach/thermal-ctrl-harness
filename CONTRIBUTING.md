@@ -29,6 +29,8 @@ pytest
 
 No GPU? Use `SIMULATE_THERMAL=1` to run the demo.
 
+If you have accelerator access and want a concrete checklist, start with [VALIDATION.md](VALIDATION.md).
+
 ## Code style
 - Python 3.9+
 - `black`, `isort`, and `flake8`

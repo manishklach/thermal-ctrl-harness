@@ -52,6 +52,8 @@ sudo mkdir /etc/thermal-ctrl && sudo cp configs/config.yaml /etc/thermal-ctrl/
 sudo systemctl enable --now thermal-ctrl
 ```
 
+**Have H100/H200?** Please see [VALIDATION.md](VALIDATION.md) and help us test.
+
 Make sure your vLLM or TensorRT-LLM admin endpoint is started with `--enable-admin-api`, otherwise the controller's `/v1/admin/batch` and `/v1/admin/kv_migrate` calls will return 404s.
 
 ### Config `/etc/thermal-ctrl/config.yaml`

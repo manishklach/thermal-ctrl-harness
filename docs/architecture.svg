@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="320" viewBox="0 0 960 320">
+  <rect width="960" height="320" fill="#ffffff"/>
+  <rect x="30" y="80" width="170" height="70" rx="8" fill="#eef2ff" stroke="#6366f1"/>
+  <text x="115" y="118" text-anchor="middle" font-family="Arial" font-size="18" fill="#1f2937">Sensors</text>
+  <text x="115" y="140" text-anchor="middle" font-family="Arial" font-size="12" fill="#374151">simulated / nvidia-smi</text>
+  <rect x="240" y="80" width="170" height="70" rx="8" fill="#ecfeff" stroke="#0891b2"/>
+  <text x="325" y="118" text-anchor="middle" font-family="Arial" font-size="18" fill="#1f2937">Workload Model</text>
+  <text x="325" y="140" text-anchor="middle" font-family="Arial" font-size="12" fill="#374151">pressure + queue</text>
+  <rect x="450" y="80" width="170" height="70" rx="8" fill="#ecfdf5" stroke="#10b981"/>
+  <text x="535" y="118" text-anchor="middle" font-family="Arial" font-size="18" fill="#1f2937">Policy Engine</text>
+  <text x="535" y="140" text-anchor="middle" font-family="Arial" font-size="12" fill="#374151">hysteresis + anti-flap</text>
+  <rect x="660" y="50" width="250" height="70" rx="8" fill="#fff7ed" stroke="#f97316"/>
+  <text x="785" y="88" text-anchor="middle" font-family="Arial" font-size="18" fill="#1f2937">Batch Backend</text>
+  <text x="785" y="110" text-anchor="middle" font-family="Arial" font-size="12" fill="#374151">mock / experimental HTTP</text>
+  <rect x="660" y="140" width="250" height="70" rx="8" fill="#fefce8" stroke="#ca8a04"/>
+  <text x="785" y="178" text-anchor="middle" font-family="Arial" font-size="18" fill="#1f2937">KV Relief Backend</text>
+  <text x="785" y="200" text-anchor="middle" font-family="Arial" font-size="12" fill="#374151">mock / experimental HTTP</text>
+  <rect x="450" y="220" width="460" height="60" rx="8" fill="#f8fafc" stroke="#64748b"/>
+  <text x="680" y="257" text-anchor="middle" font-family="Arial" font-size="18" fill="#1f2937">Metrics + Artifact Bundle</text>
+  <line x1="200" y1="115" x2="240" y2="115" stroke="#475569" stroke-width="2"/>
+  <line x1="410" y1="115" x2="450" y2="115" stroke="#475569" stroke-width="2"/>
+  <line x1="620" y1="100" x2="660" y2="85" stroke="#475569" stroke-width="2"/>
+  <line x1="620" y1="130" x2="660" y2="175" stroke="#475569" stroke-width="2"/>
+  <line x1="535" y1="150" x2="535" y2="220" stroke="#475569" stroke-width="2"/>
+</svg>

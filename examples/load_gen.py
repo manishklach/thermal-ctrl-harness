@@ -1,4 +1,7 @@
-import requests, time, random
+import random
+import time
+
+import requests
 # Spam vLLM with 128K requests to trigger thermal throttle
 for i in range(1000):
     prompt = "Write a story. " * 30000  # ~120K tokens

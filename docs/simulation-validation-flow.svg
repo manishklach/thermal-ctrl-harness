@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="920" height="240" viewBox="0 0 920 240">
+  <rect width="920" height="240" fill="#ffffff"/>
+  <rect x="30" y="70" width="180" height="80" rx="8" fill="#eef2ff" stroke="#6366f1"/>
+  <text x="120" y="110" text-anchor="middle" font-family="Arial" font-size="18">Simulation</text>
+  <text x="120" y="132" text-anchor="middle" font-family="Arial" font-size="12">policy and artifact design</text>
+  <rect x="280" y="70" width="180" height="80" rx="8" fill="#ecfeff" stroke="#0891b2"/>
+  <text x="370" y="110" text-anchor="middle" font-family="Arial" font-size="18">Validate Env</text>
+  <text x="370" y="132" text-anchor="middle" font-family="Arial" font-size="12">telemetry and adapters</text>
+  <rect x="530" y="70" width="180" height="80" rx="8" fill="#fff7ed" stroke="#f97316"/>
+  <text x="620" y="110" text-anchor="middle" font-family="Arial" font-size="18">Dry Run</text>
+  <text x="620" y="132" text-anchor="middle" font-family="Arial" font-size="12">observe reason codes</text>
+  <rect x="780" y="70" width="110" height="80" rx="8" fill="#ecfdf5" stroke="#10b981"/>
+  <text x="835" y="110" text-anchor="middle" font-family="Arial" font-size="18">Rollout</text>
+  <text x="835" y="132" text-anchor="middle" font-family="Arial" font-size="12">only after validation</text>
+  <line x1="210" y1="110" x2="280" y2="110" stroke="#475569" stroke-width="2"/>
+  <line x1="460" y1="110" x2="530" y2="110" stroke="#475569" stroke-width="2"/>
+  <line x1="710" y1="110" x2="780" y2="110" stroke="#475569" stroke-width="2"/>
+</svg>

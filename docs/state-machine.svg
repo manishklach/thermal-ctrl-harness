@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="880" height="280" viewBox="0 0 880 280">
+  <rect width="880" height="280" fill="#ffffff"/>
+  <ellipse cx="150" cy="140" rx="100" ry="48" fill="#ecfeff" stroke="#0891b2"/>
+  <text x="150" y="145" text-anchor="middle" font-family="Arial" font-size="18">Observe</text>
+  <ellipse cx="440" cy="90" rx="120" ry="48" fill="#fff7ed" stroke="#f97316"/>
+  <text x="440" y="95" text-anchor="middle" font-family="Arial" font-size="18">Throttle</text>
+  <ellipse cx="440" cy="200" rx="120" ry="48" fill="#ecfdf5" stroke="#10b981"/>
+  <text x="440" y="205" text-anchor="middle" font-family="Arial" font-size="18">Recover</text>
+  <ellipse cx="730" cy="140" rx="110" ry="48" fill="#f8fafc" stroke="#64748b"/>
+  <text x="730" y="145" text-anchor="middle" font-family="Arial" font-size="18">Degraded Hold</text>
+  <line x1="250" y1="122" x2="320" y2="102" stroke="#475569" stroke-width="2"/>
+  <text x="290" y="96" text-anchor="middle" font-family="Arial" font-size="12">temp >= threshold</text>
+  <line x1="250" y1="158" x2="320" y2="178" stroke="#475569" stroke-width="2"/>
+  <text x="296" y="196" text-anchor="middle" font-family="Arial" font-size="12">temp <= recover</text>
+  <line x1="560" y1="90" x2="620" y2="128" stroke="#475569" stroke-width="2"/>
+  <text x="620" y="116" text-anchor="middle" font-family="Arial" font-size="12">backend failures</text>
+  <line x1="560" y1="200" x2="620" y2="152" stroke="#475569" stroke-width="2"/>
+  <text x="626" y="188" text-anchor="middle" font-family="Arial" font-size="12">stale or unsafe</text>
+</svg>

@@ -1,9 +1,9 @@
 [Unit]
-Description=Thermal Control Harness for vLLM
+Description=Thermal control simulation and validation harness
 After=network.target
 [Service]
 Type=simple
-ExecStart=/usr/bin/python3 /opt/thermal-ctrl-harness/src/thermal_guard.py
+ExecStart=/usr/bin/python3 -m thermal_ctrl dry-run --config /opt/thermal-ctrl-harness/configs/config.yaml
 Restart=always
 RestartSec=2
 User=root

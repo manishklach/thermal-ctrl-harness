@@ -1,11 +1,11 @@
 # Contributing to thermal-ctrl-harness
 
-Thanks for checking this out. This is an RFC/prototype to validate if HBM thermal throttling kills vLLM p99.
+Thanks for checking this out. This is a systems RFC and simulation harness for thermal-aware inference control.
 
 ## How to help
 
 **1. Test on real hardware**
-If you have H100/H200/MI300X access, please run through `VALIDATION.md` and open an issue with results. This is the highest-leverage contribution.
+If you have H100/H200/MI300X access, please run through `docs/validation_playbook.md` and open an issue with results. This is the highest-leverage contribution.
 
 **2. Code**
 PRs welcome for:
@@ -27,7 +27,10 @@ pip install -r requirements.txt -r requirements-dev.txt
 pytest
 ```
 
-No GPU? Use `SIMULATE_THERMAL=1` to run the demo.
+No GPU? Run the simulation harness:
+```bash
+python -m thermal_ctrl compare --baseline configs/baseline.yaml --controlled configs/simulated.yaml --seed 7
+```
 
 If you have accelerator access and want a concrete checklist, start with [VALIDATION.md](VALIDATION.md).
 
@@ -41,7 +44,7 @@ If you have accelerator access and want a concrete checklist, start with [VALIDA
 1. Open an issue first for non-trivial changes
 2. Keep PRs focused: 1 feature/fix per PR
 3. CI must pass
-4. Update README if behavior changes
+4. Update README and docs if behavior changes
 
 ## Code of Conduct
 Be respectful. Assume good intent. We're all debugging GPUs together.

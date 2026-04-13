@@ -2,114 +2,167 @@
 
 [![CI](https://github.com/manishklach/thermal-ctrl-harness/actions/workflows/ci.yml/badge.svg)](https://github.com/manishklach/thermal-ctrl-harness/actions) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-<p align="center">
-  <b>Keep your H200 out of thermal throttling. Save your p99.</b><br>
-  <sub>A thermal-aware batch controller for vLLM/TensorRT-LLM that dynamically caps batch size when HBM gets hot.</sub>
-</p>
+Thermal-control simulation and validation harness for LLM inference systems.
 
-<p align="center">
-  <img src="docs/demo.gif" width="700" alt="Grafana dashboard showing temp spike → batch cut → latency saved">
-</p>
+This repository is an honest systems prototype: it models thermal pressure, queueing pressure, batch-size control, KV-relief actions, and recovery hysteresis so infra engineers can reason about control-loop behavior before they ever touch an H100 or H200.
 
-### Demo Comparison
-| Without thermal-ctrl | With thermal-ctrl |
+## Current Evidence Level
+1. **Implemented today**
+   Deterministic simulation, adapter-based control loop, artifact bundles, policy controls, environment validation, mock and experimental backends, Prometheus-compatible metrics emission.
+2. **Simulated / modeled**
+   Thermal rise under long-context pressure, latency degradation near thermal limits, KV-relief effects, oscillation risk, baseline-vs-controlled comparisons.
+3. **Not yet hardware-validated**
+   Real H100/H200/HBM behavior, upstream admin endpoint semantics, production-safe control gains, multi-GPU coordination on a live cluster.
+
+## Why this repo is useful even without hardware
+- It gives you a reproducible harness for comparing policy choices before rollout.
+- It makes trust boundaries explicit: simulated, measured, assumed, and still unknown are separated.
+- It provides extension points for real sensors and serving backends without pretending they are already validated.
+- It generates reviewable artifacts that can be shared in design docs, RFCs, or PRs.
+
+## Trust Boundaries
+- **Simulated**: temperature dynamics, queue growth, thermal-latency coupling, KV spill relief, recovery hysteresis, oscillation behavior.
+- **Assumed**: HTTP admin adapters that resemble batch-control or KV-migration surfaces; these are experimental and may not match your serving stack.
+- **Measured in the local demo**: deterministic simulation output, local CLI checks, artifact generation, and Prometheus/Grafana wiring.
+- **Still to confirm on real accelerators**: whether `nvidia-smi --query-gpu=memory.temp` is available and stable on your hardware, whether thermal risk correlates with p99 in your workload, and how safe automated control is for your inference stack.
+
+## Quick Start
+Run a local, deterministic comparison with one command:
+
+```bash
+python -m thermal_ctrl compare --baseline configs/baseline.yaml --controlled configs/simulated.yaml --seed 7
+```
+
+That command generates a comparison bundle in `artifacts/<timestamp>-compare/` with:
+- config snapshots
+- event logs
+- time series CSV
+- summary markdown
+- SVG plots
+- baseline vs controlled comparison report
+
+## Simulation Mode
+Simulation is a first-class surface in this repo, not a hidden fallback.
+
+The toy model is intentionally simple and inspectable:
+- sustained request pressure raises modeled HBM temperature
+- crossing the throttle threshold triggers a batch reduction
+- optional KV migration reduces pressure for a few steps
+- recovery happens only after hysteresis plus dwell/cooldown limits
+- latency gets worse as queue depth and thermal pressure rise
+- poor tuning can create oscillation, which is surfaced in the artifact bundle
+
+![Architecture](docs/architecture.svg)
+
+![Control Loop State](docs/state-machine.svg)
+
+![Simulation to Validation Flow](docs/simulation-validation-flow.svg)
+
+### Typical commands
+```bash
+python -m thermal_ctrl simulate --config configs/simulated.yaml --seed 7
+python -m thermal_ctrl compare --baseline configs/baseline.yaml --controlled configs/simulated.yaml --seed 7
+python -m thermal_ctrl dry-run --config configs/config.yaml --seed 7
+python -m thermal_ctrl validate-env
+```
+
+## Adapter Surface
+This repo is intentionally not hard-coded to any single inference server.
+
+### Sensors
+- `SimulatedTemperatureSensor` - `mock-only`
+- `NvidiaSmiTemperatureSensor` - `production-possible`, best-effort shell-based
+
+### Backends
+- `MockBatchBackend` - `mock-only`
+- `MockKVMigrationBackend` - `mock-only`
+- `HTTPAdminBatchBackend` - `experimental`
+- `HTTPAdminKVMigrationBackend` - `experimental`
+
+The HTTP admin adapters exist as extension points. They should be treated as prototype integrations until you validate them against your own stack.
+
+## Control Policy
+The controller is no longer a simple threshold toggle. The policy engine includes:
+- hysteresis
+- minimum dwell time
+- cooldown before recovery
+- anti-flap action budget
+- bounded step-down and recovery rates
+- degraded hold mode after repeated backend failures
+- dry-run support
+- per-GPU control state
+- reason-coded event logs
+
+See [docs/architecture.md](docs/architecture.md), [docs/simulation_model.md](docs/simulation_model.md), and [docs/failure_modes.md](docs/failure_modes.md) for details.
+
+## Reproducible Demo Artifacts
+The repo ships example GIFs from the simulation harness:
+
+| Baseline | Controlled |
 | --- | --- |
 | ![Baseline meltdown](docs/demo-baseline-meltdown.gif) | ![Throttle save](docs/demo-throttle-save.gif) |
-| p99: 4.2s, throttling | p99: 2.1s, throttles cleared |
+| fixed high pressure, no relief | batch reduction plus recovery hysteresis |
 
----
+Example generated chart from simulation mode:
 
-### The Problem
-HBM2e/HBM3 stacks thermal-throttle at ~85°C. On H200 during 128K context decode, this happens silently. Your p50 looks fine, but p99 explodes 2x because the memory controller inserts wait states.
+![Example chart](docs/example-timeseries.svg)
 
-**This repo fixes it.** Inspired by [Thermal Debt Is a Memory Problem](https://manishklach.github.io/writings/).
+## Simulated Scenario, Not Hardware Benchmark
+The comparison below is a modeled scenario produced by the simulation harness with `seed=7`. It is useful for reasoning about policy behavior, not for claiming production H200 results.
 
-### How It Works
-1. **Monitors** `nvidia-smi --query-gpu=memory.temp` every 500ms
-2. **Throttles** when any GPU ≥85°C: POST to vLLM `/v1/admin/batch` to halve `max_num_seqs`
-3. **Migrates** cold KV slabs to DRAM via `/v1/admin/kv_migrate` to drop HBM pressure  
-4. **Recovers** when temp ≤80°C: exponentially restores batch size
-5. **Exports** Prometheus metrics for Grafana alerts
+| Scenario | Peak temp | Time above threshold | Simulated p99 | Avg batch | Throughput |
+| --- | --- | --- | --- | --- | --- |
+| Baseline (`configs/baseline.yaml`) | 97.77 C | 174 s | 4904.62 ms | 256.0 | 331.86 toks/s |
+| Controlled (`configs/simulated.yaml`) | 97.54 C | 97 s | 4207.22 ms | 88.8 | 180.96 toks/s |
 
-### Benchmarks: H200 141GB, Llama-3.1-70B, 128K context
-| Scenario | p50 latency | p99 latency | Throttle events/hr | Tokens/sec |
-| --- | --- | --- | --- | --- |
-| Baseline | 1.8s | **4.2s** | 12 | 18.2 |
-| + thermal-ctrl-harness | 1.9s | **2.1s** | **0** | **24.7** |
+Run the compare command above to generate your own numbers from the checked-in model.
 
-*Simulated on internal cluster. Software Stack: CUDA 12.4, vLLM v0.4.3, Driver 550.54.14*
+## Environment Validation
+Use the built-in validator before wiring real telemetry or HTTP adapters:
 
-### 1-Click Demo
 ```bash
-git clone https://github.com/manishklach/thermal-ctrl-harness
-cd thermal-ctrl-harness
-docker compose up -d  # starts vLLM + Prometheus + Grafana + thermal-ctrl
-```
-Open http://localhost:3000 → Grafana user `admin` pass `admin`. Run `python examples/load_gen.py` to watch it throttle.
-
-Note: Demo uses `SIMULATE_THERMAL=1` to mock GPU temps. On real H100/H200, it reads from `nvidia-smi --query-gpu=memory.temp`. Tested on internal cluster: 4.2s -> 2.1s p99.
-
-### Install on Bare Metal
-```bash
-pip install -r requirements.txt
-sudo cp -r src/ /opt/thermal-ctrl-harness/
-sudo cp systemd/thermal-ctrl.service /etc/systemd/system/
-sudo mkdir /etc/thermal-ctrl && sudo cp configs/config.yaml /etc/thermal-ctrl/
-sudo systemctl enable --now thermal-ctrl
+python -m thermal_ctrl validate-env
 ```
 
-**Have H100/H200?** Please see [VALIDATION.md](VALIDATION.md) and help us test.
+It reports:
+- whether `nvidia-smi` is present
+- whether `memory.temp` appears to be queryable
+- whether the configured admin endpoint is reachable
+- what this repo considers supported versus still experimental
 
-Make sure your vLLM or TensorRT-LLM admin endpoint is started with `--enable-admin-api`, otherwise the controller's `/v1/admin/batch` and `/v1/admin/kv_migrate` calls will return 404s.
+It does **not** claim your environment is hardware-validated.
 
-### Config `/etc/thermal-ctrl/config.yaml`
-```yaml
-throttle_temp: 85  # °C - start cutting batch
-recover_temp: 80   # °C - start restoring batch
-poll_ms: 500       # polling interval
-vllm_admin: "http://localhost:8000/v1/admin"
-migrate_pct: 0.1   # spill 10% cold KV when throttling
-min_batch: 4       # never go below this
-max_batch: 256     # cap for recovery
-metrics_port: 9091
+## File Map
+```text
+thermal_ctrl/
+  backends/          adapter implementations
+  controllers/       policy engine
+  sensors/           simulated and best-effort hardware sensors
+  artifacts.py       run bundle generation
+  cli.py             user-facing commands
+  runtime.py         simulation runner
+configs/
+  baseline.yaml      no-control comparison scenario
+  simulated.yaml     controlled scenario
+docs/
+  architecture.md
+  simulation_model.md
+  failure_modes.md
+  validation_playbook.md
+  faq.md
 ```
 
-### Prometheus Alerts
-```yaml
-- alert: HBMThermalThrottle
-  expr: thermal_throttle_active == 1
-  for: 10s
-  annotations:
-    summary: "GPU {{ $labels.gpu }} throttling: {{ $value }}°C"
-```
+## Docs
+- [docs/architecture.md](docs/architecture.md)
+- [docs/simulation_model.md](docs/simulation_model.md)
+- [docs/failure_modes.md](docs/failure_modes.md)
+- [docs/policy.md](docs/policy.md)
+- [docs/validation_playbook.md](docs/validation_playbook.md)
+- [docs/faq.md](docs/faq.md)
+- [CHANGELOG.md](CHANGELOG.md)
 
-### Repo Structure
-```
-├── src/thermal_guard.py      # main daemon
-├── systemd/                 # production systemd unit
-├── docker-compose.yml       # 1-click demo: vLLM + Grafana + Prometheus
-├── configs/config.yaml      # default config
-├── charts/grafana.json      # pre-built dashboard
-├── examples/load_gen.py     # traffic generator to trigger throttling
-├── tests/                   # pytest suite
-└── docs/demo.gif            # add your own after first run
-```
+## Release Notes
+v0.2.0 reframes the project as a reproducible simulation and validation harness, adds the adapter architecture, improves the policy engine, and makes artifact generation a first-class workflow.
 
-### Roadmap
-- [ ] NVML bindings to avoid `nvidia-smi` shell-out
-- [ ] AMD MI300X support via `rocm-smi`
-- [ ] Kubernetes operator for auto-scaling
-
-### Citation
-If you use this in research, cite:
-```bibtex
-@misc{lach2026thermal,
-  title={Thermal Debt Is a Memory Problem},
-  author={Manish KL},
-  year={2026},
-  howpublished={\url{https://manishklach.github.io/writings/}}
-}
-```
-
-### License
-MIT © 2026 Manish KL
+## License
+MIT

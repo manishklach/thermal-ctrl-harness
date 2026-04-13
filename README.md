@@ -2,9 +2,9 @@
 
 [![CI](https://github.com/manishklach/thermal-ctrl-harness/actions/workflows/ci.yml/badge.svg)](https://github.com/manishklach/thermal-ctrl-harness/actions) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-Thermal-control simulation and validation harness for long-context inference.
+Thermal-aware control prototype and validation harness for long-context inference servers.
 
-This repository implements a thermal-aware control-loop prototype for inference systems: temperature sensing, batch-size reduction, optional KV-pressure relief, recovery hysteresis, and observability. The simulation path is first-class and reproducible today, so you can exercise the controller locally without target hardware. Real H100/H200 validation is still required before treating any policy or integration here as production evidence.
+This repo implements a simple thermal-control loop that can reduce batch pressure when GPU memory temperature risk rises. It is designed to be useful today in simulation/demo mode, with observability and artifact generation, and to serve as a validation harness for future testing on real H100/H200-class hardware.
 
 ## Current evidence level
 - **Implemented today**: deterministic simulation runs, policy engine, artifact bundles, mock and experimental adapters, Prometheus-compatible metrics, and reviewer-friendly docs.
@@ -18,10 +18,8 @@ This repository implements a thermal-aware control-loop prototype for inference 
 - testing observability wiring with Prometheus and Grafana
 - preparing for later validation on real H100/H200-class hardware
 
-## Hypothesis and approach
-Long-context inference can become sensitive to thermal pressure, especially when queue depth, KV pressure, and sustained batch pressure rise together. One plausible response is a controller that reduces pressure when thermal risk is high, then restores capacity cautiously once the system cools.
-
-This repo implements and demonstrates that control-loop approach. It does not claim to prove that the modeled behavior here matches any specific H100/H200 deployment yet.
+## The hypothesis
+Long-context inference can become memory-thermal-limited before the median latency makes the problem obvious. When memory temperature rises far enough, tail latency may degrade sharply. This repo implements and demonstrates a control-loop approach for exploring that hypothesis.
 
 ## Trust boundaries
 - **Simulated**: thermal dynamics, queue growth, latency penalties, KV-relief effects, oscillation risk, and baseline-vs-controller outcome comparisons.
@@ -75,15 +73,15 @@ This starts the local demo-oriented stack and keeps the controller on the simula
 
 Grafana is available at [http://localhost:3000](http://localhost:3000) and Prometheus at [http://localhost:9090](http://localhost:9090).
 
-## Example output from the simulation harness
-The table below is a simulated comparison produced by the checked-in model with `seed=7`. These values are useful for reasoning about tradeoffs inside the harness; they are not hardware benchmark claims.
+## Simulated comparison
+**The numbers below come from the repo's simulated/internal demo path, not from a publicly hardware-validated H100/H200 benchmark.**
 
 | Scenario | Peak temp | Time above threshold | Simulated p99 | Avg batch | Throughput |
 | --- | --- | --- | --- | --- | --- |
 | Baseline (`configs/baseline.yaml`) | 97.77 C | 174 s | 4904.62 ms | 256.0 | 331.86 toks/s |
 | Controlled (`configs/simulated.yaml`) | 97.54 C | 97 s | 4207.22 ms | 88.8 | 180.96 toks/s |
 
-In this modeled scenario, the controller reduces time above threshold and modeled p99 at the cost of throughput and average batch size. That tradeoff is the point of the harness: inspect it, tune it, and decide what should be validated next on real hardware.
+Modeled with the repo's current simulation assumptions. In this scenario, the controller reduces time above threshold and modeled p99 at the cost of throughput and average batch size. Real hardware validation remains pending.
 
 Example chart:
 

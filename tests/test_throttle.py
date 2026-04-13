@@ -17,4 +17,4 @@ def test_get_hbm_temps_simulated(_mock_time):
 def test_set_vllm_batch(mock_post):
     mock_post.return_value.raise_for_status = MagicMock()
     tc = tg.ThermalController(tg.DEFAULT_CONFIG)
-    assert tc.set_vllm_batch(16, 0.1) == True
+    assert tc.set_vllm_batch(16, 0.1)

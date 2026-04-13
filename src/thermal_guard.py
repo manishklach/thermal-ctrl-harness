@@ -1,7 +1,15 @@
 #!/usr/bin/env python3
-import os, subprocess, time, requests, yaml, logging, signal, sys
-from prometheus_client import start_http_server, Gauge
+import logging
+import os
+import signal
+import subprocess
+import sys
+import time
 from pathlib import Path
+
+import requests
+import yaml
+from prometheus_client import Gauge, start_http_server
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(message)s')
 
@@ -48,7 +56,7 @@ class ThermalController:
                 ["nvidia-smi", "--query-gpu=index,memory.temp", "--format=csv,noheader,nounits"],
                 stderr=subprocess.DEVNULL, timeout=2
             ).decode().strip()
-            return [(int(i), int(t)) for i, t in [l.split(", ") for l in out.split("\n") if l]]
+            return [(int(i), int(t)) for i, t in [line.split(", ") for line in out.split("\n") if line]]
         except Exception as e:
             logging.error(f"nvidia-smi failed: {e}")
             return []

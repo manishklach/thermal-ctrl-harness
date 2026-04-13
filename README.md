@@ -1,5 +1,7 @@
 # thermal-ctrl-harness
 
+[![CI](https://github.com/manishklach/thermal-ctrl-harness/actions/workflows/ci.yml/badge.svg)](https://github.com/manishklach/thermal-ctrl-harness/actions) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 <p align="center">
   <b>Keep your H200 out of thermal throttling. Save your p99.</b><br>
   <sub>A thermal-aware batch controller for vLLM/TensorRT-LLM that dynamically caps batch size when HBM gets hot.</sub>
@@ -49,6 +51,8 @@ sudo cp systemd/thermal-ctrl.service /etc/systemd/system/
 sudo mkdir /etc/thermal-ctrl && sudo cp configs/config.yaml /etc/thermal-ctrl/
 sudo systemctl enable --now thermal-ctrl
 ```
+
+Make sure your vLLM or TensorRT-LLM admin endpoint is started with `--enable-admin-api`, otherwise the controller's `/v1/admin/batch` and `/v1/admin/kv_migrate` calls will return 404s.
 
 ### Config `/etc/thermal-ctrl/config.yaml`
 ```yaml

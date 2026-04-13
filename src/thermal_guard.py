@@ -57,6 +57,8 @@ class ThermalController:
 
     def run(self):
         start_http_server(self.cfg["metrics_port"])
+        batch_gauge.set(self.current_batch)
+        throttle_gauge.set(0)
         logging.info(f"Started. Metrics :{self.cfg['metrics_port']}. Poll {self.cfg['poll_ms']}ms")
         while self.running:
             temps = self.get_hbm_temps()

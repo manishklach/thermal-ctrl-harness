@@ -14,6 +14,8 @@ from prometheus_client import Gauge, start_http_server
 logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(message)s')
 
 SIMULATE = os.getenv("SIMULATE_THERMAL") == "1" or "--simulate" in sys.argv
+SIMULATE_PROFILE = os.getenv("SIMULATE_THERMAL_PROFILE", "save")
+SIMULATE_CONTROL_MODE = os.getenv("SIMULATE_CONTROL_MODE", "guard")
 
 CONFIG_PATH = Path("/etc/thermal-ctrl/config.yaml")
 DEFAULT_CONFIG = {
@@ -30,7 +32,7 @@ class ThermalController:
     def __init__(self, cfg):
         self.cfg = cfg
         self.throttling = False
-        self.current_batch = cfg["max_batch"] // 2
+        self.current_batch = cfg["max_batch"]
         self.running = True
         signal.signal(signal.SIGTERM, self.shutdown)
 
@@ -42,15 +44,14 @@ class ThermalController:
 
     def get_hbm_temps(self):
         if SIMULATE:
-            # Simulate 72C -> 84C -> 86C -> 82C over a short loop for demos.
-            t = int(time.time()) % 20
-            if t < 5:
-                return [(0, 72)]
+            t = int(time.time()) % 30
+            if SIMULATE_PROFILE == "meltdown":
+                return [(0, 87)]
             if t < 10:
-                return [(0, 84)]
-            if t < 12:
+                return [(0, 72)]
+            if t < 15:
                 return [(0, 86)]
-            return [(0, 82)]
+            return [(0, 79)]
         try:
             out = subprocess.check_output(
                 ["nvidia-smi", "--query-gpu=index,memory.temp", "--format=csv,noheader,nounits"],
@@ -62,6 +63,10 @@ class ThermalController:
             return []
 
     def set_vllm_batch(self, max_batch, migrate_pct=0.0):
+        if SIMULATE and SIMULATE_CONTROL_MODE == "observe":
+            logging.info(f"SIMULATION observe mode: keeping batch at {self.current_batch}")
+            batch_gauge.set(self.current_batch)
+            return True
         try:
             r = requests.post(f"{self.cfg['vllm_admin']}/batch", 
                             json={"max_num_seqs": max_batch}, timeout=1)
@@ -94,17 +99,23 @@ class ThermalController:
                 self.throttling = True
                 throttle_gauge.set(1)
                 new_batch = max(self.cfg["min_batch"], self.current_batch // 2)
-                self.set_vllm_batch(new_batch, self.cfg["migrate_pct"])
-                self.current_batch = new_batch
-                logging.warning(f"THROTTLE {max_temp}C: batch->{new_batch}")
+                if SIMULATE and SIMULATE_CONTROL_MODE == "observe":
+                    logging.warning(f"THROTTLE {max_temp}C: observe-only mode, batch stays {self.current_batch}")
+                else:
+                    self.set_vllm_batch(new_batch, self.cfg["migrate_pct"])
+                    self.current_batch = new_batch
+                    logging.warning(f"THROTTLE {max_temp}C: batch->{new_batch}")
 
             elif max_temp <= self.cfg["recover_temp"] and self.throttling:
                 self.throttling = False
                 throttle_gauge.set(0)
                 new_batch = min(self.cfg["max_batch"], self.current_batch * 2)
-                self.set_vllm_batch(new_batch, 0)
-                self.current_batch = new_batch
-                logging.info(f"RECOVER {max_temp}C: batch->{new_batch}")
+                if SIMULATE and SIMULATE_CONTROL_MODE == "observe":
+                    logging.info(f"RECOVER {max_temp}C: observe-only mode, batch stays {self.current_batch}")
+                else:
+                    self.set_vllm_batch(new_batch, 0)
+                    self.current_batch = new_batch
+                    logging.info(f"RECOVER {max_temp}C: batch->{new_batch}")
 
             time.sleep(self.cfg["poll_ms"] / 1000)
 

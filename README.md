@@ -11,6 +11,12 @@
   <img src="docs/demo.gif" width="700" alt="Grafana dashboard showing temp spike → batch cut → latency saved">
 </p>
 
+### Demo Comparison
+| Without thermal-ctrl | With thermal-ctrl |
+| --- | --- |
+| ![Baseline meltdown](docs/demo-baseline-meltdown.gif) | ![Throttle save](docs/demo-throttle-save.gif) |
+| p99: 4.2s, throttling | p99: 2.1s, throttles cleared |
+
 ---
 
 ### The Problem

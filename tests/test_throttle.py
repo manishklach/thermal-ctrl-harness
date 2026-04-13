@@ -13,6 +13,11 @@ def test_get_hbm_temps_simulated(_mock_time):
     with patch.object(tg, 'SIMULATE', True):
         assert tc.get_hbm_temps() == [(0, 86)]
 
+def test_get_hbm_temps_meltdown_profile():
+    tc = tg.ThermalController(tg.DEFAULT_CONFIG)
+    with patch.object(tg, 'SIMULATE', True), patch.object(tg, 'SIMULATE_PROFILE', 'meltdown'):
+        assert tc.get_hbm_temps() == [(0, 87)]
+
 @patch('requests.post')
 def test_set_vllm_batch(mock_post):
     mock_post.return_value.raise_for_status = MagicMock()

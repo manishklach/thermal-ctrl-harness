@@ -1,0 +1,8 @@
+throttle_temp: 85
+recover_temp: 80
+poll_ms: 500
+vllm_admin: "http://localhost:8000/v1/admin"
+migrate_pct: 0.1
+min_batch: 4
+max_batch: 256
+metrics_port: 9091

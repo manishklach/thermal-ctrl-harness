@@ -1,0 +1,11 @@
+{
+  "title": "HBM Thermal Throttle", "uid": "thermal",
+  "panels": [
+    {"type": "timeseries", "title": "HBM Temp °C", "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0},
+     "targets": [{"expr": "gpu_hbm_temp_celsius"}]},
+    {"type": "timeseries", "title": "Batch Size", "gridPos": {"h": 8, "w": 12, "x": 12, "y": 0},
+     "targets": [{"expr": "vllm_max_batch_size"}]},
+    {"type": "stat", "title": "Throttling", "gridPos": {"h": 4, "w": 6, "x": 0, "y": 8},
+     "targets": [{"expr": "thermal_throttle_active"}]}
+  ]
+}

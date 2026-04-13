@@ -1,0 +1,36 @@
+version: '3.8'
+services:
+  vllm:
+    image: vllm/vllm-openai:v0.4.3
+    runtime: nvidia
+    command: --model meta-llama/Meta-Llama-3.1-8B-Instruct --max-model-len 131072 --enable-admin-api
+    ports: ["8000:8000"]
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+    deploy:
+      resources:
+        reservations:
+          devices: [{driver: nvidia, count: all, capabilities: [gpu]}]
+
+  thermal-ctrl:
+    build: .
+    depends_on: [vllm]
+    network_mode: host
+    volumes:
+      - ./configs/config.yaml:/etc/thermal-ctrl/config.yaml
+    restart: unless-stopped
+
+  prometheus:
+    image: prom/prometheus:v2.52.0
+    volumes: [./configs/prometheus.yml:/etc/prometheus/prometheus.yml]
+    ports: ["9090:9090"]
+
+  grafana:
+    image: grafana/grafana:11.0.0
+    ports: ["3000:3000"]
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes: 
+      - ./charts/grafana-datasource.yml:/etc/grafana/provisioning/datasources/datasource.yml
+      - ./charts/grafana-dashboard.yml:/etc/grafana/provisioning/dashboards/dashboard.yml
+      - ./charts/grafana.json:/var/lib/grafana/dashboards/thermal.json
